@@ -1,5 +1,6 @@
 # create dataset that will be used in the demo
 # ============================================
+setwd("/Users/zhengp/Documents/teaching/HMS520/Autumn2025/HMS520-Autumn2025")
 
 # set random seed
 set.seed(0L)
@@ -38,7 +39,7 @@ df_hours <- data.frame(
 
 # create pay rate
 df_pay <- data.frame(
-  project = project,
+  project,
   dollar_per_hour = rpois(length(project), 40)
 )
 
