@@ -141,13 +141,76 @@ df_combined <- merge(
 
 # 5. pivot
 # pivot long
+df_long <- melt(
+  df_hours,
+  id.vars = "project",
+  measure.vars = c("A", "B", "C", "D"),
+  variable.name = "employee",
+  value.name = "hours"
+)
+
+df_long[, .(total_hours = sum(hours)), by = project]
+
+df_hours[, lapply(.SD, mean), .SDcols=c("A", "B", "C", "D")]
+
+apply(df_hours[, c("A", "B", "C", "D")], MARGIN = 1, sum)
 
 # compute how much we pay for each employee
+df_result <- merge(
+  df_long,
+  df_pay,
+  by = "project",
+  all.x = TRUE
+)
+
+df_result[, pay := hours * dollar_per_hour]
+df_result[, .(total_pay = sum(pay)), by = employee]
 
 # pivot wide
+df_wide <- dcast(
+  df_result,
+  project ~ employee,
+  value.var = "pay"
+)
 
 
 # which religion earn the most?
+# install.packages("tidyr")
+library("tidyr")
+relig_income
+class(relig_income)
 
+dt_relig_income <- as.data.table(relig_income)
+class(dt_relig_income)
+
+col_names <- colnames(dt_relig_income)
+col_names <- col_names[!(col_names %in% c("religion", "Don't know/refused"))]
+
+dt_long <- melt(
+  dt_relig_income,
+  id.vars = "religion",
+  measure.vars = col_names,
+  variable.name = "income",
+  value.name = "count"
+)
+
+dt_long[, total := sum(count), by = religion]
+dt_long[, prop := count / total]
+
+dt_wide <- dcast(
+  dt_long,
+  religion ~ income,
+  value.var = "prop"
+)
+
+View(dt_wide[order(`>150k`)])
 
 ### Dark Magic
+dt_iris <- setDT(copy(iris))
+selected_cols <- c("Sepal.Length", "Sepal.Width")
+
+for (col in selected_cols) {
+  j_expr <- parse(text=paste0("mean_", col, " := mean(", col, ")"))
+  print(j_expr)
+  dt_iris[, eval(j_expr), by = Species]
+}
