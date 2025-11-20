@@ -1,5 +1,5 @@
-# linear interpolation
-# ====================
+# linear regression
+# =================
 setwd("~/Documents/teaching/HMS520/Autumn2025/HMS520-Autumn2025/")
 source("demo/Module05/functions.R")
 
@@ -11,16 +11,16 @@ dt_iris <- fread(file.path(data_dir, "iris.csv"))
 plot_data(dt_iris)
 
 # build model -------------------------------------------------------------
-# approxfun
-dt_train <- dt_iris[test == 0, list(Sepal.Width = mean(Sepal.Width)), by = Sepal.Length]
+# lm
+model <- lm(Sepal.Width ~ Sepal.Length, data = dt_iris)
+coef(model)
+vcov(model)
+summary(model)
 
-fun <- with(dt_train, approxfun(x = Sepal.Length, y = Sepal.Width, rule = 2))
-
-dt_iris[, sepal_width_fit := fun(Sepal.Length)]
+dt_iris[, sepal_width_fit := predict(model, dt_iris)]
 
 # plot fit ----------------------------------------------------------------
-plot_fit(dt_iris) +
-  geom_point(data = dt_train, mapping = aes(x = Sepal.Length, y = Sepal.Width), shape = 12)
+plot_fit(dt_iris)
 
 # summarize fit -----------------------------------------------------------
 performance <- get_performance(dt_iris)

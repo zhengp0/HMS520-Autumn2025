@@ -1,7 +1,9 @@
-# linear interpolation
-# ====================
+# linear mixed effects model
+# ==========================
 setwd("~/Documents/teaching/HMS520/Autumn2025/HMS520-Autumn2025/")
 source("demo/Module05/functions.R")
+install.packages("lme4")
+library("lme4")
 
 # load data ---------------------------------------------------------------
 data_dir <- "demo/Module05/data"
@@ -11,16 +13,12 @@ dt_iris <- fread(file.path(data_dir, "iris.csv"))
 plot_data(dt_iris)
 
 # build model -------------------------------------------------------------
-# approxfun
-dt_train <- dt_iris[test == 0, list(Sepal.Width = mean(Sepal.Width)), by = Sepal.Length]
-
-fun <- with(dt_train, approxfun(x = Sepal.Length, y = Sepal.Width, rule = 2))
-
-dt_iris[, sepal_width_fit := fun(Sepal.Length)]
+# lmer
+model <- lmer(Sepal.Width ~ Sepal.Length + (Sepal.Length || Species), dt_iris)
+coef(model)
+vcov(model)
+summary(model)
 
 # plot fit ----------------------------------------------------------------
-plot_fit(dt_iris) +
-  geom_point(data = dt_train, mapping = aes(x = Sepal.Length, y = Sepal.Width), shape = 12)
 
 # summarize fit -----------------------------------------------------------
-performance <- get_performance(dt_iris)
