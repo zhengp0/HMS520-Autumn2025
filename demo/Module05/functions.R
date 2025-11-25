@@ -21,6 +21,11 @@ plot_fit <- function(dt_iris) {
     geom_line(mapping = aes(x = Sepal.Length, y = sepal_width_fit))
 }
 
+plot_fit_group <- function(dt_iris, ...) {
+  plot_fit(dt_iris) +
+    facet_wrap(vars(Species), ...)
+}
+
 get_performance <- function(dt_iris) {
   insample_rmse <- with(dt_iris[test == 0,], get_rmse(Sepal.Width, sepal_width_fit))
   outsample_rmse <- with(dt_iris[test == 1,], get_rmse(Sepal.Width, sepal_width_fit))

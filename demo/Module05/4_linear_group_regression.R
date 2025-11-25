@@ -1,9 +1,7 @@
-# linear mixed effects model
-# ==========================
+# linear group regression
+# =======================
 setwd("~/Documents/teaching/HMS520/Autumn2025/HMS520-Autumn2025/")
 source("demo/Module05/functions.R")
-# install.packages("lme4")
-library("lme4")
 
 # load data ---------------------------------------------------------------
 data_dir <- "demo/Module05/data"
@@ -13,13 +11,17 @@ dt_iris <- fread(file.path(data_dir, "iris.csv"))
 plot_data(dt_iris)
 
 # build model -------------------------------------------------------------
-# lmer
-model <- lmer(Sepal.Width ~ Sepal.Length + (Sepal.Length || Species), dt_iris)
-coef(model)
-vcov(model)
-summary(model)
+# lm with group
 
-dt_iris[, sepal_width_fit := predict(model, dt_iris)]
+dt_group <- split(dt_iris, dt_iris$Species)
+
+models <- lapply(dt_group, function(dt) lm(Sepal.Width ~ Sepal.Length, data = dt))
+
+for (key in names(dt_group)) {
+  dt_group[[key]][, sepal_width_fit := predict(models[[key]], dt_group[[key]])]
+}
+
+dt_iris <- rbindlist(dt_group)
 
 # plot fit ----------------------------------------------------------------
 plot_fit_group(dt_iris, nrow = 3)
